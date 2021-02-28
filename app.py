@@ -6,15 +6,15 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
-
 from flask import Flask, jsonify
+
 engine = create_engine("sqlite:///hawaii.sqlite")
 Base = automap_base()
 Base.prepare(engine, reflect=True)
-
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 app = Flask(__name__)
+
 # routes
 @app.route("/")
 def welcome():
@@ -33,7 +33,6 @@ def get_t_start(start):
     queryresult = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start).all()
     session.close()
-
     tobsall = []
     for min,avg,max in queryresult:
         tob_dict = {}
@@ -41,16 +40,13 @@ def get_t_start(start):
         tob_dict["Average"] = avg
         tob_dict["Max"] = max
         tobsall.append(tob_dict)
-
     return jsonify(tobsall)
-
 @app.route('/api/v1.0/<start>/<stop>')
 def get_t_start_stop(start,stop):
     session = Session(engine)
     queryresult = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
         filter(Measurement.date >= start).filter(Measurement.date <= stop).all()
     session.close()
-
     tobsall = []
     for min,avg,max in queryresult:
         tobs_dict = {}
@@ -70,16 +66,13 @@ def tobs():
     sel = [Measurement.date,Measurement.tobs]
     queryresult = session.query(*sel).filter(Measurement.date >= querydate).all()
     session.close()
-
     tobsall = []
     for date, tobs in queryresult:
         tobs_dict = {}
         tobs_dict["Date"] = date
         tobs_dict["Tobs"] = tobs
         tobsall.append(tobs_dict)
-
     return jsonify(tobsall)
-
 @app.route('/api/v1.0/stations')
 def stations():
     session = Session(engine)
@@ -95,23 +88,19 @@ def stations():
         station_dict["Lon"] = lon
         station_dict["Elevation"] = el
         stations.append(station_dict)
-
     return jsonify(stations)
-
 @app.route('/api/v1.0/precipitation')
 def precipitation():
     session = Session(engine)
     sel = [Measurement.date,Measurement.prcp]
     queryresult = session.query(*sel).all()
     session.close()
-
     precipitation = []
     for date, prcp in queryresult:
         prec_dict = {}
         prec_dict["Date"] = date
         prec_dict["Precipitation"] = prcp
         precipitation.append(prec_dict)
-
     return jsonify(precipitation)
 
 if __name__ == '__main__':
